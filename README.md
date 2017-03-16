@@ -1,8 +1,8 @@
-#BFLX
+# BFLX
 language specification for level extended brainfuck [rev alpha.0]
 
 
-###program structure
+### program structure
 A bflx program is a sequence of byte codes (with ASCII semantics) of minimum length of 1.
     
 ## memory model
