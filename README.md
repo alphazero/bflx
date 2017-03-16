@@ -1,4 +1,4 @@
-#`BFLX`
+#BFLX
 language specification for level extended brainfuck [rev alpha.0]
 
 
