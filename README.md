@@ -84,7 +84,7 @@ A bflx program is a sequence of byte codes (with ASCII semantics) of minimum len
 - read byte from stdin unto current data cell.
 - data index incremended by 1.
 
-`!` : write byte
+`w` : write byte
 
 - write current data cell byte to stdout. 
 - data index incremented by 1.
