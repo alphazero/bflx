@@ -19,17 +19,25 @@ A bflx program is a sequence of byte codes (with ASCII semantics) of minimum len
 
 ### data cursor commands
   
-`^` : level up    
+`v` : level down    
 
-- move up to previous data array index.
-- if already at level 0, then go to the last.
+- move down to previous data array index.
+- if already at level 0, then go to top level.
  
-`v` : level down
+`^` : level up
 
   - move down to the next data array index.
-  - if already at level max, allocate a new layer and move to that.
+  - if already at top level, allocate a new layer and move to that.
   - data array levels are stateful and maintain their own data index.
       
+`T` : top level 
+
+- move to top level 
+
+`_` : bottom level 
+
+- move to bottom level 0
+
 `<` : move back
 
  - decrement data index of current data array. 
