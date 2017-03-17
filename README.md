@@ -76,13 +76,13 @@ A bflx program is a sequence of byte codes (with ASCII semantics) of minimum len
 
 ### literals 
 
-`$` : embedded data
+`'` : embedded data
 
-- treat all bytes until matching `$` as embedded data. 
+- treat all bytes until matching `'` as embedded data. 
 - data index incremented by length of embedded data.
-- `\$` escape sequence for embedding "$" (ex: `$max\$imum$` for string literal `max$imum`)
-- `\x` escape sequence for embedding hex values in range 0-F (ex: `$\xF\xE$` embeds byte `0xF` followed by byte `0xE`)
-- `\X` escape sequence for embedding hex values in range 00-FF (ex: `$\XFE$` embeds byte value`0xFE`)
+- `\'` escape sequence for embedding "'" (ex: `'they\'re'` for string literal `they're`)
+- `\x` escape sequence for embedding hex values in range 0-F (ex: `'\xF\xE'` embeds byte `0xF` followed by byte `0xE`)
+- `\X` escape sequence for embedding hex values in range 00-FF (ex: `'\XFE'` embeds byte value`0xFE`)
  
    
 ### IO commands
@@ -97,14 +97,21 @@ A bflx program is a sequence of byte codes (with ASCII semantics) of minimum len
 - write current data cell byte to stdout. 
 - data index incremented by 1.
 
-
-`n` : write numeric 
+`n` : write numeric - decimal
 
 - write the value of current byte per printf("%d", b) i.e. byte value 27 -> "27"
 
-`N` : write numeric 
+`N` : write numeric - decimal
 
 - write the zero-padded numeric value of current byte per printf("%03d", b) i.e. byte value 27 -> "027")    
+     
+`n` : write numeric - hex
+
+- write the value of current byte per printf("%02x", b) i.e. byte value 27 -> "1b"
+
+`N` : write numeric - hex
+
+- write the value of current byte per printf("%02X", b) i.e. byte value 27 -> "1B"
      
 ### control flow
 `[` : loop begin
