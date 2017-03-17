@@ -48,7 +48,7 @@ func (p *memobj) forward() {
 		p.data = append(p.data, b)
 	}
 	p.dx++
-	fmt.Printf("debug - > - %d len:%d\n", p.dx, len(p.data))
+	//	fmt.Printf("debug - > - %d len:%d\n", p.dx, len(p.data))
 }
 
 // move data cursor back by 1.
@@ -58,7 +58,7 @@ func (p *memobj) back() {
 		p.dx = len(p.data)
 	}
 	p.dx--
-	fmt.Printf("debug - < - %d\n", p.dx)
+	//	fmt.Printf("debug - < - %d\n", p.dx)
 }
 
 // decrement current cell value
@@ -139,7 +139,7 @@ func (p *interpreter) Run(program string) string {
 	var inst = []byte(program)
 	for ix := 0; ix < len(inst); ix++ {
 		d := 1
-		fmt.Printf("debug - token:%c - rx:%d\n", inst[ix], p.rx)
+		//		fmt.Printf("debug - token:%c - rx:%d\n", inst[ix], p.rx)
 		switch {
 		case inst[ix] == '[' && p.level[p.lx].Get() == 0:
 			for d > 0 {
@@ -161,14 +161,49 @@ func (p *interpreter) Run(program string) string {
 					d++
 				}
 			}
+		case inst[ix] == '\'': // embedded data
+			var done, esc bool
+			for !done {
+				ix++
+				c := inst[ix]
+				switch {
+				case !esc && c == '\'':
+					done = true
+				case !esc && c == '\\':
+					esc = true
+				case esc && c == 'x': // single byte hex
+					ix++
+					b := hexnum(inst[ix])
+					p.level[p.lx].Set(b)
+					p.level[p.lx].forward()
+					esc = false
+				case esc && c == 'X': // double byte hex
+					ix++
+					b := hexnum(inst[ix]) << 4
+					ix++
+					b |= hexnum(inst[ix])
+					p.level[p.lx].Set(b)
+					p.level[p.lx].forward()
+					esc = false
+				case esc && (c != '\'' && c != '\\'):
+					p.level[p.lx].Set('\\')
+					p.level[p.lx].forward()
+					fallthrough
+				default:
+					esc = false
+					p.level[p.lx].Set(c)
+					p.level[p.lx].forward()
+				}
+			}
+			//			fmt.Printf("\"\n")
 		case inst[ix] >= '0' && inst[ix] <= '9':
 			p.rx = int(inst[ix] - 48)
-			fmt.Printf("debug - register[%d]=%d\n", p.rx, p.register[p.rx])
+			//			fmt.Printf("debug - register[%d]=%d\n", p.rx, p.register[p.rx])
 		case inst[ix] == '#':
 			p.register[p.rx] = p.level[p.lx].Get()
-			fmt.Printf("debug - register[%d]=%d\n", p.rx, p.register[p.rx])
+			//			fmt.Printf("debug - register[%d]=%d\n", p.rx, p.register[p.rx])
 		case inst[ix] == '%':
-			fmt.Printf("debug - register[%d]=%d level:%d\n", p.rx, p.register[p.rx], p.lx)
+			//			fmt.Printf("debug - register[%d]=%d level:%d\n", p.rx, p.register[p.rx], p.lx)
 			p.level[p.lx].Set(p.register[p.rx])
 		case inst[ix] == '+':
 			p.level[p.lx].increment()
@@ -193,6 +228,14 @@ func (p *interpreter) Run(program string) string {
 		case inst[ix] == 'w':
 			out = append(out, p.level[p.lx].Get())
 			p.level[p.lx].forward()
+		case inst[ix] == 'x':
+			numrep := fmt.Sprintf("%02x", p.level[p.lx].Get())
+			out = append(out, []byte(numrep)...)
+			p.level[p.lx].forward()
+		case inst[ix] == 'X':
+			numrep := fmt.Sprintf("%02X", p.level[p.lx].Get())
+			out = append(out, []byte(numrep)...)
+			p.level[p.lx].forward()
 		case inst[ix] == 'n':
 			numrep := fmt.Sprintf("%d", p.level[p.lx].Get())
 			out = append(out, []byte(numrep)...)
@@ -204,7 +247,7 @@ func (p *interpreter) Run(program string) string {
 		case inst[ix] == '?':
 			var b byte
 			fmt.Scanf("%c\n", &b)
-			fmt.Printf("debug input:%d\n", b)
+			//			fmt.Printf("debug input:%d\n", b)
 			p.level[p.lx].Set(b)
 			p.level[p.lx].forward()
 		default:
@@ -212,4 +255,22 @@ func (p *interpreter) Run(program string) string {
 	}
 
 	return string(out)
+}
+
+// ----------------------------------------------------------------------
+// util support
+// ----------------------------------------------------------------------
+
+// map expected hexnum textual representation to value
+// panics on bad data
+func hexnum(c byte) byte {
+	switch {
+	case c >= 48 && c <= 57:
+		c -= 48
+	case c >= 65 && c <= 70:
+		c -= 55
+	case c >= 97 && c <= 102:
+		c -= 87
+	}
+	return c
 }
