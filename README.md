@@ -105,11 +105,11 @@ A bflx program is a sequence of byte codes (with ASCII semantics) of minimum len
 
 - write the zero-padded numeric value of current byte per printf("%03d", b) i.e. byte value 27 -> "027")    
      
-`n` : write numeric - hex
+`x` : write numeric - hex
 
 - write the value of current byte per printf("%02x", b) i.e. byte value 27 -> "1b"
 
-`N` : write numeric - hex
+`X` : write numeric - hex
 
 - write the value of current byte per printf("%02X", b) i.e. byte value 27 -> "1B"
      
