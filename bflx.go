@@ -61,6 +61,14 @@ func (p *memobj) back() {
 	//	fmt.Printf("debug - < - %d\n", p.dx)
 }
 
+func (p *memobj) start() {
+	p.dx = 0
+}
+
+func (p *memobj) end() {
+	p.dx = len(p.data) - 1
+}
+
 // decrement current cell value
 func (p *memobj) decrement() {
 	p.data[p.dx]--
@@ -214,9 +222,9 @@ func (p *interpreter) Run(program string) string {
 		case inst[ix] == '<':
 			p.level[p.lx].back()
 		case inst[ix] == '(':
-			p.level[p.lx].dx = 0
+			p.level[p.lx].start()
 		case inst[ix] == ')':
-			p.level[p.lx].dx = len(p.level[p.lx].data) - 1
+			p.level[p.lx].end()
 		case inst[ix] == '^':
 			p.levelUp()
 		case inst[ix] == 'v':
